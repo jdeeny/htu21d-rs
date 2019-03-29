@@ -1,0 +1,9 @@
+[package]
+name = "htu21d"
+version = "0.1.0"
+authors = ["jdeeny <jdeeny@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+embedded-hal = "0.2.2"
+crc_all = { git = "https://github.com/nanpuyue/crc" }
