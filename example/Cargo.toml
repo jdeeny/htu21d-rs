@@ -1,8 +1,0 @@
-[package]
-name = "example-htu21d"
-version = "0.0.1"
-authors = ["John Deeny <jdeeny@gmail.com>", "Sean Bruton <sean@uberfoo.net>"]
-
-[dependencies]
-htu21d = { path = ".." }
-linux-embedded-hal = "0.2.0"
