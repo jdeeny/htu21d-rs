@@ -86,14 +86,23 @@ where
 
     /// Initializes the HTU21D
     pub fn init(&mut self) -> Result<(), Error<E>> {
-        self.soft_reset()
+        self.soft_reset()?;
+        self.heat()
     }
 
     fn soft_reset(&mut self) -> Result<(), Error<E>> {
-        //self.write_register(HTU21D_REG_SOFT_RESET, HTU21D_SOFT_RESET_CMD)?;
+        self.i2c
+            .write(self.address, &[HTU21D_REG_SOFT_RESET])
+            .map_err(Error::I2c)?;
         Ok(())
     }
 
+    fn heat(&mut self) -> Result<(), Error<E>> {
+        self.i2c
+            .write(self.address, &[HTU21D_REG_WRITE_USER, 0x03])
+            .map_err(Error::I2c)?;
+            Ok(())
+    }
     /// Captures and processes sensor data for temperature and relative humidity.
     /// Temperature data is used to correct the humidity data.
     pub fn measure(&mut self) -> Result<Measurements, Error<E>> {
@@ -116,7 +125,7 @@ where
         self.i2c
             .write_read(self.address, &[HTU21D_REG_RH_HOLD], &mut data)
             .map_err(Error::I2c)?;
-        Ok((data[0] as u16) << 8 | data[1] as u16)
+        Ok((data[0] as u16) << 8 | (data[1] as u16))
     }
 
     fn parse(humidity: u16, temperature: u16) -> Result<Measurements, Error<E>> {
