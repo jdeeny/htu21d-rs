@@ -108,7 +108,7 @@ where
     pub fn measure(&mut self) -> Result<Measurements, Error<E>> {
         let h = self.read_humidity_reg()?;
         let t = self.read_temperature_reg()?;
-        let result = Self::parse(h, t)?;
+        let result = parse(h, t)?;
         Ok(result)
     }
 
@@ -128,10 +128,32 @@ where
         Ok((data[0] as u16) << 8 | (data[1] as u16))
     }
 
-    fn parse(humidity: u16, temperature: u16) -> Result<Measurements, Error<E>> {
-        let h = -6.0 + 125.0 * (humidity as f32 / 65536.0);
-        let t = -46.85 + 175.12 * (temperature as f32 / 65536.0);
 
-        Ok( Measurements { temperature: t, humidity: h })
-    }
+}
+
+fn parse<E>(humidity: u16, temperature: u16) -> Result<Measurements, Error<E>> {
+    let h = -6.0 + 125.0 * ((humidity & 0xFFFC) as f32 / 65536.0);
+    let t = -46.85 + 175.72 * ((temperature & 0xFFFC) as f32 / 65536.0);
+
+    Ok( Measurements { temperature: t, humidity: h })
+}
+
+#[test]
+/// Test parsing of temperature using examples given in the datasheet
+fn test_parse_temp() {
+    use assert_float_eq::*;
+    let humidity: u16 = 0x683A;
+    let temp: u16 = 0x4E85;
+    let meas = parse::<()>(humidity, temp).unwrap();
+    assert_float_absolute_eq!(meas.temperature, 7.04, 0.01);
+}
+
+#[test]
+/// Test parsing of humidity using examples given in the datasheet
+fn test_parse_rh() {
+    use assert_float_eq::*;
+    let humidity: u16 = 0x683A;
+    let temp: u16 = 0x4E85;
+    let meas = parse::<()>(humidity, temp).unwrap();
+    assert_float_absolute_eq!(meas.humidity, 44.8, 0.1);
 }

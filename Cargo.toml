@@ -10,3 +10,4 @@ crc_all = { git = "https://github.com/nanpuyue/crc" }
 
 [dev-dependencies]
 linux-embedded-hal = "0.2.2"
+assert_float_eq = "1.1.3"
