@@ -1,5 +1,5 @@
-#![doc(html_root_url = "https://docs.rs/bme280")]
-#![doc(issue_tracker_base_url = "https://github.com/uber-foo/bme280/issues/")]
+//#![doc(html_root_url = "https://docs.rs/bme280")]
+//#![doc(issue_tracker_base_url = "https://github.com/uber-foo/bme280/issues/")]
 #![deny(
     missing_docs, missing_debug_implementations, missing_copy_implementations, trivial_casts,
     trivial_numeric_casts, unsafe_code, unstable_features, unused_import_braces,
@@ -8,7 +8,7 @@
 )]
 #![no_std]
 
-//! A platform agnostic Rust driver for the Measurement Specialties HTU21D, based on the
+//! A platform agnostic Rust driver for TE's HTU21D temperature and humidity sensor, based on the
 //! [`embedded-hal`](https://github.com/japaric/embedded-hal) traits.
 
 extern crate embedded_hal;
@@ -19,16 +19,14 @@ const HTU21D_I2C_ADDR: u8 = 0x40;
 
 const HTU21D_REG_TEMP_HOLD: u8 = 0xE3;
 const HTU21D_REG_RH_HOLD: u8 = 0xE5;
-const HTU21D_REG_TEMP_NOHOLD: u8 = 0xF3;
-const HTU21D_REG_RH_NOHOLD: u8 = 0xF5;
-const HTU21D_REG_WRITE_USER: u8 = 0xE6;
-const HTU21D_REG_READ_USER: u8 = 0xE7;
-const HTU21D_REG_SOFT_RESET: u8 = 0xFE;
+#[allow(dead_code)] const HTU21D_REG_TEMP_NOHOLD: u8 = 0xF3;
+#[allow(dead_code)] const HTU21D_REG_RH_NOHOLD: u8 = 0xF5;
+#[allow(dead_code)] const HTU21D_REG_WRITE_USER: u8 = 0xE6;
+#[allow(dead_code)] const HTU21D_REG_READ_USER: u8 = 0xE7;
+#[allow(dead_code)] const HTU21D_REG_SOFT_RESET: u8 = 0xFE;
 
 const HTU21D_RH_DATA_LEN: usize = 3;
 const HTU21D_T_DATA_LEN: usize = 3;
-
-const HTU21D_SOFT_RESET_CMD: u8 = 0x00;
 
 /*macro_rules! concat_bytes {
     ($msb:expr, $lsb:expr) => {
@@ -99,9 +97,9 @@ where
     /// Captures and processes sensor data for temperature and relative humidity.
     /// Temperature data is used to correct the humidity data.
     pub fn measure(&mut self) -> Result<Measurements, Error<E>> {
-        let t = self.read_temperature_reg()?;
         let h = self.read_humidity_reg()?;
-        let result = Self::parse(t, h)?;
+        let t = self.read_temperature_reg()?;
+        let result = Self::parse(h, t)?;
         Ok(result)
     }
 
@@ -122,7 +120,10 @@ where
     }
 
     fn parse(humidity: u16, temperature: u16) -> Result<Measurements, Error<E>> {
-        Ok( Measurements { temperature: temperature as f32, humidity: humidity as f32 })
+        let h = -6.0 + 125.0 * (humidity as f32 / 65536.0);
+        let t = -46.85 + 175.12 * (temperature as f32 / 65536.0);
+
+        Ok( Measurements { temperature: t, humidity: h })
     }
 
 /*    fn read_register(&mut self, register: u8) -> Result<u8, Error> {
