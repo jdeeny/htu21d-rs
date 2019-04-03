@@ -110,15 +110,19 @@ where
         self.i2c
             .write_read(self.address, &[HTU21D_REG_TEMP_HOLD], &mut data)
             .map_err(Error::I2c)?;
-        Ok(0)
+        Ok((data[0] as u16) << 8 | data[1] as u16)
     }
 
     fn read_humidity_reg(&mut self) -> Result<u16, Error<E>> {
-        Ok(0)
+        let mut data: [u8; HTU21D_RH_DATA_LEN] = [0; HTU21D_RH_DATA_LEN];
+        self.i2c
+            .write_read(self.address, &[HTU21D_REG_RH_HOLD], &mut data)
+            .map_err(Error::I2c)?;
+        Ok((data[0] as u16) << 8 | data[1] as u16)
     }
 
-    fn parse(_humidity: u16, _temperature: u16) -> Result<Measurements, Error<E>> {
-        Ok( Measurements { temperature: 0.0, humidity: 0.0 })
+    fn parse(humidity: u16, temperature: u16) -> Result<Measurements, Error<E>> {
+        Ok( Measurements { temperature: temperature as f32, humidity: humidity as f32 })
     }
 
 /*    fn read_register(&mut self, register: u8) -> Result<u8, Error> {
