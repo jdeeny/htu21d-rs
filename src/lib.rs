@@ -125,26 +125,4 @@ where
 
         Ok( Measurements { temperature: t, humidity: h })
     }
-
-/*    fn read_register(&mut self, register: u8) -> Result<u8, Error> {
-        let mut data: [u8; 1] = [0];
-        self.i2c
-            .write_read(self.address, &[register], &mut data)
-            .map_err(Error::I2c)?;
-        Ok(data[0])
-    }
-
-    fn read_data(&mut self, register: u8) -> Result<u16, Error> {
-        let mut data: [u8; BME280_P_T_H_DATA_LEN] = [0; BME280_P_T_H_DATA_LEN];
-        self.i2c
-            .write_read(self.address, &[register], &mut data)
-            .map_err(Error::I2c)?;
-        Ok(data)
-    }
-
-    fn write_register(&mut self, register: u8, payload: u8) -> Result<(), Error> {
-        self.i2c
-            .write(self.address, &[register, payload])
-            .map_err(Error::I2c)
-    }*/
 }
